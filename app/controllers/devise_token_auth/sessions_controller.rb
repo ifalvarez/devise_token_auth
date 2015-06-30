@@ -22,14 +22,13 @@ module DeviseTokenAuth
           q_value.downcase!
         end
 
-        q = "#{field.to_s} = ? AND provider='email'"
-
-        if ActiveRecord::Base.connection.adapter_name.downcase.starts_with? 'mysql'
-          q = "BINARY " + q
-        end
-
-        @resource = resource_class.where(q, q_value).first
+        @resource = resource_class.where(field.to_s => q_value, provider: 'email').first
+    
       end
+
+      puts "::::::::::::::::"
+      puts @resource.inspect
+      puts "::::::::::::::::"
 
       if @resource and valid_params?(field, q_value) and @resource.valid_password?(resource_params[:password]) and @resource.confirmed?
         # create client id
@@ -46,6 +45,9 @@ module DeviseTokenAuth
 
         yield if block_given?
 
+        puts "xxxxxxxxxxxxxxxxxxxxxxxx"
+        puts "valid password, logged in"
+        puts "xxxxxxxxxxxxxxxxxxxxxxxx"
         render json: {
           data: @resource.token_validation_response
         }

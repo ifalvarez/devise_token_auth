@@ -15,7 +15,8 @@ module DeviseTokenAuth
                  :omniauth_prefix,
                  :default_confirm_success_url,
                  :default_password_reset_url,
-                 :redirect_whitelist
+                 :redirect_whitelist,
+                 :threadsafe
 
   self.change_headers_on_each_request = true
   self.token_lifespan                 = 2.weeks
@@ -24,6 +25,7 @@ module DeviseTokenAuth
   self.default_confirm_success_url    = nil
   self.default_password_reset_url     = nil
   self.redirect_whitelist             = nil
+  self.threadsafe                     = true
 
   def self.setup(&block)
     yield self

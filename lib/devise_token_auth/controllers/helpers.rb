@@ -30,13 +30,17 @@ module DeviseTokenAuth
 
           class_eval <<-METHODS, __FILE__, __LINE__ + 1
             def authenticate_#{group_name}!(favourite=nil, opts={})
+              puts 'eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
               unless #{group_name}_signed_in?
+                puts '22222222eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
                 mappings = #{mappings}
                 mappings.unshift mappings.delete(favourite.to_sym) if favourite
                 mappings.each do |mapping|
                   set_user_by_token(mapping)
+                  puts '33333eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
                 end
               end
+              puts '4444444eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
             end
 
             def #{group_name}_signed_in?
@@ -100,7 +104,9 @@ module DeviseTokenAuth
 
         class_eval <<-METHODS, __FILE__, __LINE__ + 1
           def authenticate_#{mapping}!
+            puts '111111'
             unless current_#{mapping}
+              puts '222222'
               return render json: {
                 errors: ["Authorized users only."]
               }, status: 401
@@ -108,10 +114,12 @@ module DeviseTokenAuth
           end
 
           def #{mapping}_signed_in?
+            puts '333333'
             !!current_#{mapping}
           end
 
           def current_#{mapping}
+            puts '4444444'
             @current_#{mapping} ||= set_user_by_token(:#{mapping})
           end
 
