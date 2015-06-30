@@ -14,17 +14,9 @@ module DeviseTokenAuth::Concerns::SetUserByToken
 
   # user auth
   def set_user_by_token(mapping=nil)
-    puts "------------- set user by token"
-    logger.warn "*** BEGIN RAW REQUEST HEADERS ***"
-    self.request.env.each do |header|
-      logger.warn "HEADER: #{header[0]} = #{header[1]}"
-    end
-    logger.warn "*** END RAW REQUEST HEADERS ***"
     # determine target authentication class
     rc = resource_class(mapping)
 
-    puts "777777"
-    
     # no default user defined
     return unless rc
 
@@ -43,12 +35,8 @@ module DeviseTokenAuth::Concerns::SetUserByToken
       @resource.create_new_auth_token
     end
 
-    puts "88888888888"
-
     # user has already been found and authenticated
     return @resource if @resource and @resource.class == rc
-
-    puts "999999"
 
     # ensure we clear the client_id
     if !@token
@@ -56,16 +44,12 @@ module DeviseTokenAuth::Concerns::SetUserByToken
       return
     end
 
-    puts "6666666666666666"
     return false unless @token
 
     # mitigate timing attacks by finding by uid instead of auth token
     # user = uid && rc.find_by_uid(uid)
     user = uid && rc.where(uid: uid).first
-    puts "++++++++++++++"
-    puts user.inspect
-    puts "++++++++++++++"
-
+  
     if user && user.valid_token?(@token, @client_id)
       sign_in(:user, user, store: false, bypass: true)
       return @resource = user
