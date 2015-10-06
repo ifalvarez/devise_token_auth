@@ -42,54 +42,54 @@ module DeviseTokenAuth
         end
       end
 
-      begin
-        # override email confirmation, must be sent manually from ctrl
-        @resource.class.skip_callback("create", :after, :send_on_create_confirmation_instructions)
-        if @resource.save
-          yield @resource if block_given?
+      #begin
+      # override email confirmation, must be sent manually from ctrl
+      @resource.class.skip_callback("create", :after, :send_on_create_confirmation_instructions)
+      if @resource.save
+        yield @resource if block_given?
 
-          unless @resource.confirmed?
-            # user will require email authentication
-            @resource.send_confirmation_instructions({
-              client_config: params[:config_name],
-              redirect_url: redirect_url
-            })
+        unless @resource.confirmed?
+          # user will require email authentication
+          @resource.send_confirmation_instructions({
+            client_config: params[:config_name],
+            redirect_url: redirect_url
+          })
 
-          else
-            # email auth has been bypassed, authenticate user
-            @client_id = SecureRandom.urlsafe_base64(nil, false)
-            @token     = SecureRandom.urlsafe_base64(nil, false)
-
-            @resource.tokens[@client_id] = {
-              token: BCrypt::Password.create(@token),
-              expiry: (Time.now + DeviseTokenAuth.token_lifespan).to_i
-            }
-
-            @resource.save!
-
-            update_auth_header
-          end
-
-          render json: {
-            status: 'success',
-            data:   @resource.as_json
-          }
         else
-          clean_up_passwords @resource
-          render json: {
-            status: 'error',
-            data:   @resource.as_json,
-            errors: @resource.errors.to_hash.merge(full_messages: @resource.errors.full_messages)
-          }, status: 403
+          # email auth has been bypassed, authenticate user
+          @client_id = SecureRandom.urlsafe_base64(nil, false)
+          @token     = SecureRandom.urlsafe_base64(nil, false)
+
+          @resource.tokens[@client_id] = {
+            token: BCrypt::Password.create(@token),
+            expiry: (Time.now + DeviseTokenAuth.token_lifespan).to_i
+          }
+
+          @resource.save!
+
+          update_auth_header
         end
-      rescue ActiveRecord::RecordNotUnique
+
+        render json: {
+          status: 'success',
+          data:   @resource.as_json
+        }
+      else
         clean_up_passwords @resource
         render json: {
           status: 'error',
           data:   @resource.as_json,
-          errors: ["An account already exists for #{@resource.email}"]
+          errors: @resource.errors.to_hash.merge(full_messages: @resource.errors.full_messages)
         }, status: 403
       end
+      #rescue ActiveRecord::RecordNotUnique
+      # clean_up_passwords @resource
+      #  render json: {
+      #    status: 'error',
+      #    data:   @resource.as_json,
+      #    errors: ["An account already exists for #{@resource.email}"]
+      #  }, status: 403
+      #end
     end
 
     def update
