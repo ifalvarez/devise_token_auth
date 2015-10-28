@@ -25,7 +25,7 @@ module DeviseTokenAuth
   self.default_confirm_success_url    = nil
   self.default_password_reset_url     = nil
   self.redirect_whitelist             = nil
-  self.threadsafe                     = true
+  self.threadsafe                     = false
 
   def self.setup(&block)
     yield self
